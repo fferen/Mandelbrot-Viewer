@@ -269,12 +269,12 @@ int main(int argc, char *argv[]) {
                 case SDL_MOUSEBUTTONDOWN:
                     switch (evt.button.button) {
                         case SDL_BUTTON_LEFT:
-                            /* the center set point when zooming */
+                            ; // case statements can't be followed by declarations. WTF
                             Point zoom_center = scale_pt(
                                     (Point) {evt.button.x, screen->h - evt.button.y},
                                     screen_bounds,
                                     cur_state.bnds
-                                    );
+                                    ); // the center set point when zooming
 
                             hist_push();
 
@@ -299,10 +299,10 @@ int main(int argc, char *argv[]) {
                             }
                             break;
                     }
+                    break;
             }
         }
         SDL_Delay(1);
     }
-
     return 0;
 }
