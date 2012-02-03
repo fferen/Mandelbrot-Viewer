@@ -1,7 +1,8 @@
 Mandelbrot set viewer.
 
-Controls:
+Requires SDL, only compiles with C99.
 
+Controls:
 Left click      zoom in
 Right click     zoom out
 Arrow keys      move around
