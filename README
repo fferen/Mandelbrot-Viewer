@@ -1,6 +1,6 @@
 Mandelbrot set viewer.
 
-Requires SDL, only compiles with C99.
+Requires SDL, C99 compliant compiler.
 
 Controls:
 Left click      zoom in
