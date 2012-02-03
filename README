@@ -1,0 +1,10 @@
+Mandelbrot set viewer.
+
+Controls:
+
+Left click      zoom in
+Right click     zoom out
+Arrow keys      move around
+q               quit
++               increase precision
+-               decrease precision

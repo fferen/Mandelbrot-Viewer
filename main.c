@@ -235,12 +235,6 @@ int main(int argc, char *argv[]) {
                             cur_state.max_iters *= 1 - MAX_ITER_CHG;
                             redraw(NULL);
                             break;
-                        case SDLK_z:
-                            if (hist->len > 0) {
-                                zs_pop(hist, &cur_state);
-                                redraw(NULL);
-                            }
-                            break;
                     }
                     if (move_x_prop || move_y_prop) {
                         int start_x, start_y;
@@ -273,31 +267,38 @@ int main(int argc, char *argv[]) {
                     }
                     break;
                 case SDL_MOUSEBUTTONDOWN:
-                    if (evt.button.button == SDL_BUTTON_LEFT) {
-                        /* the center set point when zooming */
-                        Point zoom_center = scale_pt(
-                                (Point) {evt.button.x, screen->h - evt.button.y},
-                                screen_bounds,
-                                cur_state.bnds
-                                );
+                    switch (evt.button.button) {
+                        case SDL_BUTTON_LEFT:
+                            /* the center set point when zooming */
+                            Point zoom_center = scale_pt(
+                                    (Point) {evt.button.x, screen->h - evt.button.y},
+                                    screen_bounds,
+                                    cur_state.bnds
+                                    );
 
-                        hist_push();
+                            hist_push();
 
-                        printf("Zoom center: ");
-                        print_pt(zoom_center);
+                            printf("Zoom center: ");
+                            print_pt(zoom_center);
 
-                        printf("Old bounds: ");
-                        print_bounds(cur_state.bnds);
+                            printf("Old bounds: ");
+                            print_bounds(cur_state.bnds);
 
-                        cur_state.bnds = scale_and_center(cur_state.bnds, ZOOM_SCALE, &zoom_center);
-                        printf("New bounds: ");
-                        print_bounds(cur_state.bnds);
+                            cur_state.bnds = scale_and_center(cur_state.bnds, ZOOM_SCALE, &zoom_center);
+                            printf("New bounds: ");
+                            print_bounds(cur_state.bnds);
 
-                        cur_state.max_iters = (int)(cur_state.max_iters * (1 + 0.5 * cur_state.prop_in_set));
-                        redraw(NULL);
-                        printf("Prop in set: %f\n", cur_state.prop_in_set);
+                            cur_state.max_iters = (int)(cur_state.max_iters * (1 + 0.5 * cur_state.prop_in_set));
+                            redraw(NULL);
+                            printf("Prop in set: %f\n", cur_state.prop_in_set);
+                            break;
+                        case SDL_BUTTON_RIGHT:
+                            if (hist->len > 0) {
+                                zs_pop(hist, &cur_state);
+                                redraw(NULL);
+                            }
+                            break;
                     }
-                    break;
             }
         }
         SDL_Delay(1);
