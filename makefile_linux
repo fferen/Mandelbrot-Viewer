@@ -1,0 +1,5 @@
+all:
+	gcc -o mandelbrot *.c -lm `sdl-config --cflags --libs` -O3 -ldl
+
+debug:
+	gcc -o mandelbrot_debug *.c -lSDL -pg
