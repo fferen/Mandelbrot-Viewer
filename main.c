@@ -1,3 +1,29 @@
+/*
+Copyright (c) 2012, Kevin Han
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+    Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+
+    Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 #include <stdio.h>
 #include <math.h>
 #include <stdbool.h>
@@ -27,12 +53,15 @@
 
 /* Return the number of iterations it takes for a number to escape, or -1 if it
  * is exceeds max and is considered to be in the set.
+ *
+ * Iterations are normalized by adding a value in [0, 1] to provide continuous
+ * coloring.
  */
 float esc_iters(LongDbl real, LongDbl imag, int max) {
     register LongDbl real_temp;
     register LongDbl c_real = real;
     register LongDbl c_imag = imag;
-    register int iters;
+    register unsigned iters;
 
     for (iters = 0; real * real + imag * imag < 9 && iters < max; iters++) {
         real_temp = real * real - imag * imag + c_real;
@@ -45,6 +74,30 @@ float esc_iters(LongDbl real, LongDbl imag, int max) {
         return iters + 1 - log(log(sqrt(real * real + imag * imag))) / log(2);
     }
 }
+
+// Version that stores a**2 and b**2 in a+bi as temp variables. May be slightly
+// faster, haven't noticed significant difference in practice.
+//
+//float esc_iters(LongDbl real, LongDbl imag, int max) {
+//    register LongDbl real_temp;
+//    register LongDbl c_real = real;
+//    register LongDbl c_imag = imag;
+//    register LongDbl r_sqrd = 0, i_sqrd = 0;
+//    register int iters;
+//
+//    for (iters = 0; r_sqrd + i_sqrd < 9 && iters < max; iters++) {
+//        r_sqrd = real * real;
+//        i_sqrd = imag * imag;
+//        real_temp = r_sqrd - i_sqrd + c_real;
+//        imag = 2 * imag * real + c_imag;
+//        real = real_temp;
+//    }
+//    if (iters == max) {
+//        return -1;
+//    } else {
+//        return iters + 1 - log(log(sqrt(real * real + imag * imag))) / log(2);
+//    }
+//}
 
 /* Return one of: PT_IN_SET, PT_NOT_IN_SET, or PT_OUT_OF_RANGE. */
 char pt_in_state(Point set_pt, ZoomState *state, Bounds surf_bnds, SDL_Surface *surf) {
@@ -170,7 +223,7 @@ int main(int argc, char *argv[]) {
             );
     const Bounds screen_bounds = {0, screen->w, 0, screen->h};
 
-    ZoomStack *hist = zs_create(); /* a LIFO stack of previous states */
+    ZoomStack *hist = zs_create_stack(); /* a LIFO stack of previous states */
     ZoomState cur_state = zs_create_state(
         norm_aspect((Bounds) {-2, 0.5, -1.2, 1.21}, screen_bounds),
         START_ITERS,

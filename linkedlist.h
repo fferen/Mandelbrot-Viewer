@@ -1,3 +1,29 @@
+/*
+Copyright (c) 2012, Kevin Han
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted provided that the following conditions are met:
+
+    Redistributions of source code must retain the above copyright notice, this
+    list of conditions and the following disclaimer.
+
+    Redistributions in binary form must reproduce the above copyright notice,
+    this list of conditions and the following disclaimer in the documentation
+    and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 #pragma once
 
 /* Define a linked list structure and related operations.
@@ -12,7 +38,6 @@ typedef struct ll_node {
     void *value;
     struct ll_node *next;
     struct ll_node *prev;
-    size_t size;
 } LLNode;
 
 typedef struct linked_list {
@@ -37,9 +62,7 @@ LinkedList *ll_create_from_list(LinkedList *list);
 /* Remove and return element at index i, or NULL if i is too large. */
 void *ll_pop(LinkedList *list, int i);
 
-/* Deallocate the memory taken up by the list. Also deallocate the memory
- * used by the values if the size is -1.
- */
+/* Deallocate the memory taken up by the list. */
 void ll_free(LinkedList *list);
 
 /*** ADDING ELEMENTS ***/
@@ -47,14 +70,7 @@ void ll_free(LinkedList *list);
 ///* Concatenate l1 with l2 and return the new list. */
 //LinkedList *ll_concat(LinkedList *l1, LinkedList *l2);
 
-/* Append data to the list, and return a pointer to the stored value.
- *
- * <size> is the size of the data. If <size> is -1, simply store the pointer
- * passed in. This will return the same pointer.
- *
- * If not, store a copy of the value instead. This allows you to pass in
- * pointers to data on the stack without pointer invalidation.
- */
+/* Append data to the list, and return a pointer to the stored value. */
 void *ll_append(LinkedList *list, void *value);
 
 /*** ACCESSING ELEMENTS ***/
