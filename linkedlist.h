@@ -26,6 +26,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
+#include <stdbool.h>
+#include <stdlib.h>
+
 /* Define a linked list structure and related operations.
  *
  * Access length with list->len.
@@ -34,16 +37,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * around to the end.
  */
 
-typedef struct ll_node {
-    void *value;
-    struct ll_node *next;
-    struct ll_node *prev;
-} LLNode;
-
 typedef struct linked_list {
     struct ll_node *first;
     struct ll_node *last;
-    unsigned int len;
+    unsigned len;
 } LinkedList;
 
 /*** CREATION ***/
@@ -52,7 +49,7 @@ typedef struct linked_list {
 LinkedList *ll_create_empty(void);
 
 /* Create a linked list from an array, pointing to the elements in the array. */
-LinkedList *ll_create_from_array(void *arr, unsigned int len, size_t type_size);
+LinkedList *ll_create_from_array(void *arr, unsigned len, size_t type_size);
 
 /* Create a new linked list with the same elements as another. */
 LinkedList *ll_create_from_list(LinkedList *list);
@@ -60,17 +57,17 @@ LinkedList *ll_create_from_list(LinkedList *list);
 /*** DELETION ***/
 
 /* Remove and return element at index i, or NULL if i is too large. */
-void *ll_pop(LinkedList *list, int i);
+void *ll_pop(LinkedList *list, long i);
 
 /* Deallocate the memory taken up by the list. */
 void ll_free(LinkedList *list);
 
-/*** ADDING ELEMENTS ***/
+/*** ADDITION ***/
 
 ///* Concatenate l1 with l2 and return the new list. */
 //LinkedList *ll_concat(LinkedList *l1, LinkedList *l2);
 
-/* Append data to the list, and return a pointer to the stored value. */
+/* Append data to the list, and return the value passed in. */
 void *ll_append(LinkedList *list, void *value);
 
 /*** ACCESSING ELEMENTS ***/
@@ -78,10 +75,10 @@ void *ll_append(LinkedList *list, void *value);
 /* Return a new list made from the elements with indices above and including i1
  * but below i2.
  */
-LinkedList *ll_slice(LinkedList *list, int i1, int i2);
+LinkedList *ll_slice(LinkedList *list, long i1, long i2);
 
 /* Return the value at index i or NULL if index is invalid. */
-void *ll_at(LinkedList *list, int i);
+void *ll_at(LinkedList *list, long i);
 
 /*** I/O ***/
 
@@ -90,3 +87,16 @@ void *ll_at(LinkedList *list, int i);
  * *print_val is a function that should take a value in the list and print it.
  */
 void ll_print(LinkedList *list, void (*print_val)(void *));
+
+/*** SEQUENCE OPS ***/
+
+/* Call function on each value in list, without modifying the list.
+ *
+ * This is useful, for example, for free()ing all elements quickly.
+ */
+void ll_apply(LinkedList *list, void (*func)(void *));
+
+/* Return the first element in list for which test(elem) returns true, or NULL
+ * if none do.
+ */
+void *ll_filter_first(LinkedList *list, bool (*test)(void *));

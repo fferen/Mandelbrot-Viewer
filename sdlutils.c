@@ -96,7 +96,6 @@ RGBColor pixel_to_color(Uint32 pixel, SDL_PixelFormat *fmt) {
 }
 
 RGBColor get_pixel(SDL_Surface *surface, int x, int y) {
-    RGBColor color;
     int bpp = surface->format->BytesPerPixel;
     /* Here p is the address to the pixel we want to retrieve */
     Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;

@@ -28,6 +28,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.'
 #include <string.h>
 #include <stdlib.h>
 
+/* Don't actually use this, of course; it was made just for fun. */
 void quicksort(int *l, int size) {
     if (size <= 1) {
         return;
@@ -54,6 +55,7 @@ void quicksort(int *l, int size) {
     quicksort(l + j, size - j);
 }
 
+/* Print on integer array: {i1, i2, i3} */
 void print_i_array(int *l, int size) {
     int i;
     printf("{");
@@ -63,16 +65,19 @@ void print_i_array(int *l, int size) {
     printf("%d}\n", l[size - 1]);
 }
 
-void free_n(void *ptr) {
-    free(ptr);
-    ptr = NULL;
+/* Free pointer and set it to NULL. */
+void free_n(void **ptr) {
+    free(*ptr);
+    *ptr = NULL;
 }
 
+/* Copy memory at pointer to heap and return pointer to it. This is useful for
+ * easily copying stack memory to the heap.
+ */
 void *cp_to_heap(void *ptr, size_t size) {
     void *dest = malloc(size);
     if (dest == NULL) {
         return NULL;
     }
-
     return memcpy(dest, ptr, size);
 }

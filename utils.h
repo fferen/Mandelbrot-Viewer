@@ -26,16 +26,16 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.'
 
 #pragma once
 
-/* Don't use this, obviously. Just practicing writing algorithms. */
+/* Don't actually use this, of course; it was made just for fun. */
 void quicksort(int *l, int size);
 
-/* Print an array of ints: {<i1>, <i2>, ...} */
+/* Print on integer array: {i1, i2, i3} */
 void print_i_array(int *l, int size);
 
-/* Free memory and set ptr to NULL. */
-void free_n(void *ptr);
-
-/* Allocate memory on the heap and copy data at ptr to it. Return pointer to
- * allocated memory.
+/* Copy memory at pointer to heap and return pointer to it. This is useful for
+ * easily copying stack memory to the heap.
  */
 void *cp_to_heap(void *ptr, size_t size);
+
+/* Free pointer and set it to NULL. */
+void free_n(void **ptr);

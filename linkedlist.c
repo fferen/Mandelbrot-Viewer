@@ -26,14 +26,21 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "linkedlist.h"
 #include "utils.h"
 
+typedef struct ll_node {
+    void *value;
+    struct ll_node *next;
+    struct ll_node *prev;
+} LLNode;
+
 /* ALWAYS CALL THIS before doing any comparisons using index, as unsigned/signed
  * comparisons with negative numbers are a bitch.
  */
-static unsigned int _ll_get_real_ind(int i, int len) {
+static unsigned _ll_get_real_ind(long i, unsigned len) {
     if (len == 0) {
         return 0;
     }
@@ -48,18 +55,18 @@ static unsigned int _ll_get_real_ind(int i, int len) {
 }
 
 /* Return the node at index i. May be NULL if i is too large. */
-static LLNode *_ll_node_at(LinkedList *list, int i) {
-    i = _ll_get_real_ind(i, list->len);
-    if (list->len && i == list->len - 1) {
+static LLNode *_ll_node_at(LinkedList *list, long i) {
+    unsigned new_i = _ll_get_real_ind(i, list->len);
+    if (list->len && new_i == list->len - 1) {
         return list->last;
-    } else if (i >= list->len) {
+    } else if (new_i >= list->len) {
         return NULL;
     }
 
-    int j;
-    if (i > list->len / 2) {
+    unsigned j;
+    if (new_i > list->len / 2) {
         LLNode *node = list->last;
-        for (j = list->len - 1; j > i; j--) {
+        for (j = list->len - 1; j > new_i; j--) {
             node = node->prev;
             if (node == NULL) {
                 return NULL;
@@ -68,7 +75,7 @@ static LLNode *_ll_node_at(LinkedList *list, int i) {
         return node;
     } else {
         LLNode *node = list->first;
-        for (j = 0; j < i; j++) {
+        for (j = 0; j < new_i; j++) {
             node = node->next;
             if (node == NULL) {
                 return NULL;
@@ -94,7 +101,7 @@ static LLNode *_ll_node_at(LinkedList *list, int i) {
 //    l1->last = l2->last;
 //    l1->len += l2->len;
 //
-//    free_n(l2);
+//    free_n(&l2);
 //}
 //
 //void ll_concat_ip(LinkedList *l1, LinkedList *l2) {
@@ -123,7 +130,8 @@ static LLNode *_ll_node_at(LinkedList *list, int i) {
 //    return new;
 //}
 
-void *ll_pop(LinkedList *list, int i) {
+/* Remove and return element at index i, or NULL if i is too large. */
+void *ll_pop(LinkedList *list, long i) {
     LLNode *removed = _ll_node_at(list, i);
     if (removed == NULL) {
         return NULL;
@@ -144,12 +152,15 @@ void *ll_pop(LinkedList *list, int i) {
         list->last = prev;
         prev->next = NULL;
     }
+
     list->len -= 1;
+
     void *value = removed->value;
     free(removed);
     return value;
 }
 
+/* Append data to the list, and return the value passed in. */
 void *ll_append(LinkedList *list, void *value) {
     LLNode *newNode = malloc(sizeof(LLNode));
     if (newNode == NULL) {
@@ -172,6 +183,7 @@ void *ll_append(LinkedList *list, void *value) {
     return value;
 }
 
+/* Create and return an empty list. */
 LinkedList *ll_create_empty(void) {
     LinkedList *list = malloc(sizeof(LinkedList));
     if (list == NULL) {
@@ -184,7 +196,10 @@ LinkedList *ll_create_empty(void) {
     return list;
 }
 
-LinkedList *ll_slice(LinkedList *list, int i1, int i2) {
+/* Return a new list made from the elements with indices above and including i1
+ * but below i2.
+ */
+LinkedList *ll_slice(LinkedList *list, long i1, long i2) {
     i1 = _ll_get_real_ind(i1, list->len);
     i2 = _ll_get_real_ind(i2, list->len);
     if (i1 >= i2 || i1 >= list->len) {
@@ -195,50 +210,53 @@ LinkedList *ll_slice(LinkedList *list, int i1, int i2) {
         i2 = list->len;
     }
 
-    unsigned int new_len = i2 - i1;
     LinkedList *new_list = ll_create_empty();
 
     LLNode *node = _ll_node_at(list, i1);
-    int i;
-    for (i = 0; i < new_len; i++) {
+    for (unsigned i = 0; i < i2 - i1; i++) {
         ll_append(new_list, node->value);
         node = node->next;
     }
     return new_list;
 }
 
+/* Create a new linked list with the same elements as another. */
 LinkedList *ll_create_from_list(LinkedList *list) {
     LinkedList *new_list = ll_create_empty();
     LLNode *node = list->first;
 
-    int i;
-    for (i = 0; i < list->len; i++) {
+    for (unsigned i = 0; i < list->len; i++) {
         ll_append(new_list, node->value);
         node = node->next;
     }
     return new_list;
 }
 
-void *ll_at(LinkedList *list, int i) {
+/* Return the value at index i or NULL if index is invalid. */
+void *ll_at(LinkedList *list, long i) {
     LLNode *node = _ll_node_at(list, i);
     return (node == NULL) ? NULL : node->value;
 }
 
-LinkedList *ll_create_from_array(void *arr, unsigned int len, size_t type_size) {
+/* Create a linked list from an array, pointing to the elements in the array. */
+LinkedList *ll_create_from_array(void *arr, unsigned len, size_t type_size) {
     unsigned char *arr_head = arr; /* so that pointer arithmetic is defined */
     LinkedList *list = ll_create_empty();
-    int i;
-    for (i = 0; i < len; i++) {
+    for (unsigned i = 0; i < len; i++) {
         ll_append(list, arr_head + i * type_size);
     }
     return list;
 }
 
+/* Print the linked list in this format: {<val1>, <val2>, ...}.
+ *
+ * *print_val is a function that should take a value in the list and print it.
+ */
 void ll_print(LinkedList *list, void (*print_val)(void *)) {
     printf("{");
     LLNode *node = list->first;
-    int i;
-    for (i = 0; i < (int)(list->len) - 1; i++) {
+    unsigned iters = list->len == 0 ? 0 : list->len - 1;
+    for (unsigned i = 0; i < iters; i++) {
         (*print_val)(node->value);
         node = node->next;
         printf(", ");
@@ -249,14 +267,40 @@ void ll_print(LinkedList *list, void (*print_val)(void *)) {
     printf("}\n");
 }
 
+/* Deallocate the memory taken up by the list. */
 void ll_free(LinkedList *list) {
-    int i;
     LLNode *node = list->first;
     LLNode *next = NULL;
-    for (i = 0; i < list->len; i++) {
+    for (unsigned i = 0; i < list->len; i++) {
         next = node->next;
         free(node); /* like the IRC network */
         node = next;
     }
-    free_n(list);
+    free(list);
+}
+
+/* Call function on each value in list, without modifying the list.
+ *
+ * This is useful, for example, for free()ing all elements quickly.
+ */
+void ll_apply(LinkedList *list, void (*func)(void *)) {
+    LLNode *node = list->first;
+    for (unsigned i = 0; i < list->len; i++) {
+        (*func)(node->value);
+        node = node->next;
+    }
+}
+
+/* Return the first element in list for which test(elem) returns true, or NULL
+ * if none do.
+ */
+void *ll_filter_first(LinkedList *list, bool (*test)(void *)) {
+    LLNode *node = list->first;
+    for (unsigned i = 0; i < list->len; i++) {
+        if ((*test)(node->value)) {
+            return node->value;
+        }
+        node = node->next;
+    }
+    return NULL;
 }

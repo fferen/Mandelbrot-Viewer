@@ -1,11 +1,12 @@
+BUILD = gcc -Wall -ansi -std=c99 -L/opt/local/lib `sdl-config --cflags --static-libs`
 mac:
-	gcc -o mandelbrot_mac *.c `sdl-config --cflags --static-libs` -O3 -fnested-functions
+	$(BUILD) -o mandelbrot_mac *.c -O3 -fnested-functions
 
 debug-mac:
-	gcc -o mandelbrot_debug_mac *.c `sdl-config --cflags --static-libs` -fnested-functions -pg
+	$(BUILD) -o mandelbrot_debug_mac *.c -fnested-functions -pg
 
 linux:
-	gcc -o mandelbrot_linux *.c `sdl-config --cflags --static-libs` -O3
+	$(BUILD) -o mandelbrot_linux *.c -O3
 
 debug-linux:
-	gcc -o mandelbrot_debug_linux *.c `sdl-config --cflags --static-libs` -pg
+	$(BUILD) -o mandelbrot_debug_linux *.c -pg
